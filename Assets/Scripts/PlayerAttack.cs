@@ -1,51 +1,62 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 public class PlayerAttack : MonoBehaviour
 {
-    public bool enemyDetected;
-    private GameObject enemy;
     private Animator anim;
-    // Start is called before the first frame update
+    private GameObject enemy;
+    public float attackCooldown = 0.5f;
+    private float lastAttackTime;
+    
     void Start()
     {
         anim = GetComponent<Animator>();
-        enemy = GameObject.FindGameObjectWithTag("Enemy");
+        lastAttackTime = -attackCooldown;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        Attack();
+        HandleAttack();
     }
-    public void Attack()
+    
+    public void HandleAttack()
     {
-        if (Input.GetKey(KeyCode.K))
+
+        if (Input.GetKeyDown(KeyCode.K) && Time.time >= lastAttackTime + attackCooldown)
         {
             anim.SetBool("Attack", true);
-            
-            if (enemyDetected)
+            if (enemy !=null)
             {
-
-                enemy.GetComponent<Enemy>().TakeDamage(5);
-                Debug.Log("Daño enemigo");
+                Enemy enemyScript = enemy.GetComponent<Enemy>();
+                if (enemyScript != null)
+                {
+                    enemyScript.TakeDamage(5);
+                    Debug.Log("¡Daño al enemigo aplicado!");
+                }
             }
-            else
-            {
-                 Debug.Log("no hay enemigo");
-            }
+            lastAttackTime = Time.time;
         }
         else
         {
+          
             anim.SetBool("Attack", false);
         }
-        
     }
-    private void OnCOllisionEnter2D(Collision2D other)
+
+    private void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
-            enemyDetected = true;
+            enemy = other.gameObject;
+        }
+    }
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            enemy = null;
             
         }
     }

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Enemy : MonoBehaviour
 {
@@ -11,12 +13,17 @@ public class Enemy : MonoBehaviour
     private bool playerDetected;
     public int maxHealth = 10;
     public int Health;
+    [SerializeField] private float coolDown = 1f;
+    private float lastCoolDown;
+    [SerializeField] private TMP_Text enemyLife;
+   
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         player = GameObject.FindGameObjectWithTag("Player");
         Health = maxHealth;
+        lastCoolDown = -coolDown;
     }
 
     // Update is called once per frame
@@ -27,33 +34,32 @@ public class Enemy : MonoBehaviour
         {
             Vector2 dir = (player.transform.position - transform.position).normalized;
             rb.velocity = dir * speed;
-            Debug.Log("Moverse hacia el jugador");
+            
+        }
+        else if(direction<= attackDetection)
+        {
+            EnemyAttack();
+            
         }
         else
         {
-            Debug.Log("Atacar jugador");
+            rb.velocity = Vector2.zero;
         }
-
+        
         // Debug.Log(("distance player" + direction));
     }
     public void EnemyAttack()
     {
-        if (playerDetected)
+        if (Time.time >= lastCoolDown + coolDown)
         {
             player.GetComponent<PlayerHealth>().TakeDamage(5);
+            lastCoolDown = Time.time;
         }
     }
-    private void OnCOllisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("Player"))
-        {
-            playerDetected = true;
-        }
-    }
-    public void TakeDamage(int damage)
+   public void TakeDamage(int damage)
     {
         Health -= damage;
-
+        enemyLife.text = "Vida enemigo: " + Health.ToString();
         if (Health <= 0)
         {
             anim.SetTrigger("Hit");
