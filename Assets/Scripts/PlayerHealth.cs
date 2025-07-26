@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 10;
     public int Health;
-    public TMP_Text PlayerLife;
+
+    [SerializeField] private TMP_Text playerLife;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,7 +19,7 @@ public class PlayerHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         Health -= damage;
-        PlayerLife.text = "Player Life: " + Health.ToString();
+        playerLife.text = "Vida del jugador: " + Health.ToString();
         if (Health <= 0)
         {
             Destroy(gameObject);

@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Enemy : MonoBehaviour
 {
@@ -13,16 +13,17 @@ public class Enemy : MonoBehaviour
     private bool playerDetected;
     public int maxHealth = 10;
     public int Health;
-    public TMP_Text EnemyLife;
-    public float CoolDown = 1f;
+    [SerializeField] private float coolDown = 1f;
     private float lastCoolDown;
+    [SerializeField] private TMP_Text enemyLife;
+   
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         player = GameObject.FindGameObjectWithTag("Player");
         Health = maxHealth;
-        lastCoolDown = -CoolDown;
+        lastCoolDown = -coolDown;
     }
 
     // Update is called once per frame
@@ -33,34 +34,32 @@ public class Enemy : MonoBehaviour
         {
             Vector2 dir = (player.transform.position - transform.position).normalized;
             rb.velocity = dir * speed;
-           
+            
         }
-        else if( direction <= attackDetection)
+        else if(direction<= attackDetection)
         {
             EnemyAttack();
+            
         }
         else
         {
-           
+            rb.velocity = Vector2.zero;
         }
-
+        
         // Debug.Log(("distance player" + direction));
     }
     public void EnemyAttack()
     {
-       if(Time.time >= lastCoolDown + CoolDown)
-       {
-
+        if (Time.time >= lastCoolDown + coolDown)
+        {
             player.GetComponent<PlayerHealth>().TakeDamage(5);
             lastCoolDown = Time.time;
-       }
-        
+        }
     }
-    
-    public void TakeDamage(int damage)
+   public void TakeDamage(int damage)
     {
         Health -= damage;
-        EnemyLife.text = "Enemy Life: " + Health.ToString();
+        enemyLife.text = "Vida enemigo: " + Health.ToString();
         if (Health <= 0)
         {
             anim.SetTrigger("Hit");
