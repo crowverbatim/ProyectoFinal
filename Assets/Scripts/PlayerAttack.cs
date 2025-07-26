@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 public class PlayerAttack : MonoBehaviour
 {
-    public bool enemyDetected;
+    
     private GameObject enemy;
     private Animator anim;
+    public float CoolDown = 1f;
+    private float lastCoolDown;
     // Start is called before the first frame update
     void Start()
     {
         anim = GetComponent<Animator>();
-        enemy = GameObject.FindGameObjectWithTag("Enemy");
+        lastCoolDown = -CoolDown;
+        
     }
 
     // Update is called once per frame
@@ -20,33 +23,44 @@ public class PlayerAttack : MonoBehaviour
     }
     public void Attack()
     {
-        if (Input.GetKey(KeyCode.K))
+        if (Input.GetKey(KeyCode.K) && Time.time >= lastCoolDown + CoolDown)
         {
             anim.SetBool("Attack", true);
-            
-            if (enemyDetected)
-            {
 
-                enemy.GetComponent<Enemy>().TakeDamage(5);
-                Debug.Log("Daño enemigo");
-            }
-            else
+            if (enemy != null)
             {
-                 Debug.Log("no hay enemigo");
+                
+                Enemy newEnemy = enemy.GetComponent<Enemy>();
+                if(newEnemy !=null)
+                {
+                    newEnemy.TakeDamage(5);
+                    Debug.Log("Daño enemigo");
+
+                }
             }
+            lastCoolDown = Time.time;
         }
         else
         {
             anim.SetBool("Attack", false);
         }
-        
+
     }
-    private void OnCOllisionEnter2D(Collision2D other)
+    private void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
-            enemyDetected = true;
-            
+            enemy = other.gameObject;
+
         }
     }
+    private void OnCollisionExit2D(Collision2D other)
+     {
+          if (other.gameObject.CompareTag("Enemy"))
+        {
+            enemy =null;
+
+        }
+    }
+    
 }

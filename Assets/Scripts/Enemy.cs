@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class Enemy : MonoBehaviour
 {
@@ -11,12 +13,16 @@ public class Enemy : MonoBehaviour
     private bool playerDetected;
     public int maxHealth = 10;
     public int Health;
+    public TMP_Text EnemyLife;
+    public float CoolDown = 1f;
+    private float lastCoolDown;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         player = GameObject.FindGameObjectWithTag("Player");
         Health = maxHealth;
+        lastCoolDown = -CoolDown;
     }
 
     // Update is called once per frame
@@ -27,33 +33,34 @@ public class Enemy : MonoBehaviour
         {
             Vector2 dir = (player.transform.position - transform.position).normalized;
             rb.velocity = dir * speed;
-            Debug.Log("Moverse hacia el jugador");
+           
+        }
+        else if( direction <= attackDetection)
+        {
+            EnemyAttack();
         }
         else
         {
-            Debug.Log("Atacar jugador");
+           
         }
 
         // Debug.Log(("distance player" + direction));
     }
     public void EnemyAttack()
     {
-        if (playerDetected)
-        {
+       if(Time.time >= lastCoolDown + CoolDown)
+       {
+
             player.GetComponent<PlayerHealth>().TakeDamage(5);
-        }
+            lastCoolDown = Time.time;
+       }
+        
     }
-    private void OnCOllisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("Player"))
-        {
-            playerDetected = true;
-        }
-    }
+    
     public void TakeDamage(int damage)
     {
         Health -= damage;
-
+        EnemyLife.text = "Enemy Life: " + Health.ToString();
         if (Health <= 0)
         {
             anim.SetTrigger("Hit");
